@@ -1,0 +1,6 @@
+*.py[co]
+data
+test
+.DS_Store
+.xlsx
+.proof
