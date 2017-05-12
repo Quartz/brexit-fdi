@@ -22,17 +22,31 @@ def load_data(data):
 
 
 def uk_stocks(data):
-    uk_stocks = data['table'].where(lambda r: r['indicator'] == 'Direct investment stocks - Million ECU/EUR' and r['geo'] == 'United Kingdom' and r['year'] == '2012')
+    stocks = data['table'].where(lambda r: r['indicator'] == 'Direct investment stocks - Million ECU/EUR' and r['geo'] == 'United Kingdom' and r['year'] == '2012')
 
-    inbound_stocks = uk_stocks.where(lambda r: r['variable'] == 'Financial account, Direct investment, In the reporting economy').select(['partner', 'value']).rename({
+    inbound_stocks = stocks.where(lambda r: r['variable'] == 'Financial account, Direct investment, In the reporting economy').select(['partner', 'value']).rename({
         'value': 'inbound'
     })
-    outbound_stocks = uk_stocks.where(lambda r: r['variable'] == 'Financial account, Direct investment, Abroad').select(['partner', 'value']).rename({
+    outbound_stocks = stocks.where(lambda r: r['variable'] == 'Financial account, Direct investment, Abroad').select(['partner', 'value']).rename({
         'value': 'outbound'
     })
 
     data['uk_stocks'] = inbound_stocks.join(outbound_stocks, 'partner', columns=['outbound'])
     data['uk_stocks'].to_csv('uk_stocks.csv')
+
+
+def uk_flows(data):
+    flows = data['table'].where(lambda r: r['indicator'] == 'Direct investment flows - Million ECU/EUR' and r['geo'] == 'United Kingdom' and r['year'] == '2012')
+
+    inbound_flows = flows.where(lambda r: r['variable'] == 'Financial account, Direct investment, In the reporting economy').select(['partner', 'value']).rename({
+        'value': 'inbound'
+    })
+    outbound_flows = flows.where(lambda r: r['variable'] == 'Financial account, Direct investment, Abroad').select(['partner', 'value']).rename({
+        'value': 'outbound'
+    })
+
+    data['uk_flows'] = inbound_flows.join(outbound_flows, 'partner', columns=['outbound'])
+    data['uk_flows'].to_csv('uk_flows.csv')
 
 
 def spit_it_out(data):
@@ -42,5 +56,6 @@ def spit_it_out(data):
 if __name__ == '__main__':
     data_loaded = proof.Analysis(load_data)
     data_loaded.then(uk_stocks)
+    data_loaded.then(uk_flows)
 
     data_loaded.run()
